@@ -1,22 +1,25 @@
-const express = require('express');
+const express = require("express");
+const multer = require("multer");
+
 const musicController = require("../controllers/music.controller");
-const authMiddleware = require("../middlewares/auth.middleware");
-const multer = require('multer');
-
-
-const upload = multer({
-    storage: multer.memoryStorage()
-})
+const authorize = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
+const upload = multer({
+    storage: multer.memoryStorage(),
+});
 
-router.post("/upload", authMiddleware.authArtist, upload.single("music"), musicController.createMusic)
-router.post("/album", authMiddleware.authArtist, upload.single("music"), musicController.createAlbum)
-router.get("/", authMiddleware.authUser, musicController.getAllMusics)
-router.get("/albums", authMiddleware.authUser, musicController.getAllAlbums)
-router.get("/albums/:albumId", authMiddleware.authUser, musicController.getAlbumsById)
+// Artist Routes
+router.post( "/upload", authorize("artist"), upload.single("music"), musicController.createMusic );
 
+router.post( "/album", authorize("artist"), musicController.createAlbum );
 
+// User & Artist Routes
+router.get( "/", authorize("user", "artist"), musicController.getAllMusics );
+
+router.get( "/albums", authorize("user", "artist"), musicController.getAllAlbums );
+
+router.get( "/albums/:albumId", authorize("user", "artist"), musicController.getAlbumById );
 
 module.exports = router;
