@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 function authorize(...roles) {
     return (req, res, next) => {
         try {
@@ -30,3 +32,5 @@ function authorize(...roles) {
         }
     };
 }
+
+module.exports = authorize;
