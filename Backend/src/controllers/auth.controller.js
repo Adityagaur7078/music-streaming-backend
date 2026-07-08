@@ -20,10 +20,10 @@ async function registerUser(req, res) {
 
     const hash = await bcrypt.hash(password, 10);
 
-    const user = new userModel.create({
+    const user = await userModel.create({
         username,
         email,
-        password,
+        password: hash,
         role
     })
 
