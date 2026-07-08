@@ -1,52 +1,32 @@
-const jwt = require("jsonwebtoken");
-const { promisify } = require("util");
+function authorize(...roles) {
+    return (req, res, next) => {
+        try {
+            const token = req.cookies.token;
 
-const verifyToken = promisify(jwt.verify);
+            if (!token) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Unauthorized",
+                });
+            }
 
-async function authArtist (req, res, next) {
-    try {
-        const token = req.cookies.token;
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        if (!token) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
+            if (!roles.includes(decoded.role)) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Forbidden",
+                });
+            }
 
-        const decoded = await verifyToken(token, process.env.JWT_SECRET);
+            req.user = decoded;
 
-        if (decoded.role !== "artist") {
-            return res.status(403).json({
-                message: "You don't have access to perform this action",
+            next();
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid or expired token",
             });
         }
-
-        req.user = decoded;
-        next();
-    } catch (err) {
-        return res.status(401).json({ message: "Unauthorized" });
-    }
-};
-
-
-async function authUser(req, res, next) {
-    const token = req.cookies.token;
-
-    if (!token) {
-        res.status(401).json({ message: "Unauthorized"})
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-        if (decoded.role !== "user") {
-            return res.status(403).json({ message: "You don't have access" })
-        }
-        req.user = decoded;
-        next();
-
-    } catch (err) {
-        console.log(err);
-        return res.status(401).json({ message: "unauthorized" })
-    }
+    };
 }
-
-module.exports = { authArtist, authUser };
