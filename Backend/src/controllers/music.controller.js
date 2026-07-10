@@ -150,10 +150,150 @@ async function getAlbumById(req, res) {
     }
 }
 
+async function getArtistMusics(req, res) {
+    try {
+
+        const musics = await musicModel
+            .find({
+                artist: req.user.id,
+            })
+            .populate("artist", "username email");
+
+        return res.status(200).json({
+            success: true,
+            message: "Artist musics fetched successfully",
+            musics,
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+
+    }
+}
+
+async function getArtistAlbums(req, res) {
+    try {
+
+        const albums = await albumModel
+            .find({
+                artist: req.user.id,
+            })
+            .populate("artist", "username email")
+            .populate("musics");
+
+        return res.status(200).json({
+            success: true,
+            message: "Artist albums fetched successfully",
+            albums,
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+
+    }
+}
+
+async function deleteMusic(req, res) {
+    try {
+
+        const { musicId } = req.params;
+
+        const music = await musicModel.findOne({
+            _id: musicId,
+            artist: req.user.id,
+        });
+
+        if (!music) {
+            return res.status(404).json({
+                success: false,
+                message: "Music not found",
+            });
+        }
+
+        await albumModel.updateMany(
+            {},
+            {
+                $pull: {
+                    musics: music._id,
+                },
+            }
+        );
+
+        await music.deleteOne();
+
+        return res.status(200).json({
+            success: true,
+            message: "Music deleted successfully",
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+
+    }
+}
+
+async function deleteAlbum(req, res) {
+    try {
+
+        const { albumId } = req.params;
+
+        const album = await albumModel.findOne({
+            _id: albumId,
+            artist: req.user.id,
+        });
+
+        if (!album) {
+            return res.status(404).json({
+                success: false,
+                message: "Album not found",
+            });
+        }
+
+        await album.deleteOne();
+
+        return res.status(200).json({
+            success: true,
+            message: "Album deleted successfully",
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+
+    }
+}
+
 module.exports = {
     createMusic,
     createAlbum,
     getAllMusics,
     getAllAlbums,
     getAlbumById,
+    getArtistMusics,
+    getArtistAlbums,
+    deleteMusic,
+    deleteAlbum,
 };
