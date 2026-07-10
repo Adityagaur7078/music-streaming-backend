@@ -181,22 +181,6 @@ Tested endpoints include:
 
 ---
 
-## 🚀 Future Improvements
-
-- Refresh Token Authentication
-- Request Validation (Joi/Zod)
-- Global Error Handler
-- Music Search
-- Playlist Feature
-- Likes & Favorites
-- Admin Dashboard
-- Streaming Analytics
-- Unit & Integration Tests
-- Docker Support
-- CI/CD Pipeline
-
----
-
 ## 👨‍💻 Author
 
 **Aditya Gaur**
